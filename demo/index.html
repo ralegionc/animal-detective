@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>*{box-sizing:border-box}body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>The Animal Detective</title>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --paper: #ecefe9;
+    --card: #f9fbf7;
+    --sunk: #e3e8df;
+    --ink: #1b211c;
+    --soft: #67736a;
+    --line: #d3dbd0;
+    --accent: #46684f;
+    --accent-ink: #ffffff;
+    --shadow: 0 1px 1px rgba(27,33,28,.04), 0 10px 26px rgba(27,33,28,.07);
+
+    --display: "Fraunces", Georgia, "Times New Roman", serif;
+    --body: "Public Sans", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #131714;
+      --card: #1c211d;
+      --sunk: #171c18;
+      --ink: #e7ece7;
+      --soft: #96a298;
+      --line: #2c332e;
+      --accent: #8fb897;
+      --accent-ink: #131714;
+      --shadow: 0 1px 1px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #131714;
+    --card: #1c211d;
+    --sunk: #171c18;
+    --ink: #e7ece7;
+    --soft: #96a298;
+    --line: #2c332e;
+    --accent: #8fb897;
+    --accent-ink: #131714;
+    --shadow: 0 1px 1px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.3);
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .sheet { max-width: 1080px; margin: 0 auto; padding: 46px 24px 72px; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--soft);
+  }
+
+  header { border-bottom: 2px solid var(--ink); padding-bottom: 22px; }
+  h1 {
+    font-family: var(--display);
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-size: clamp(34px, 5.6vw, 54px);
+    line-height: 1.02;
+    letter-spacing: -.018em;
+    text-wrap: balance;
+    margin: 10px 0 12px;
+  }
+  header p { margin: 0; color: var(--soft); max-width: 63ch; }
+  header p strong { color: var(--ink); font-weight: 500; }
+
+  /* ---- the two modes ---- */
+  .modes { display: flex; gap: 0; margin: 26px 0 30px; border-bottom: 1px solid var(--line); }
+  .mode {
+    font-family: var(--body); font-size: 15px; color: var(--soft);
+    background: transparent; border: none; border-bottom: 2px solid transparent;
+    padding: 9px 2px; margin-right: 26px; cursor: pointer;
+  }
+  .mode.on { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
+  .mode:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  .presets {
+    display: flex; flex-wrap: wrap; gap: 7px;
+    align-items: baseline; margin: 0 0 28px;
+  }
+  .presets .eyebrow { margin-right: 6px; }
+  .chip {
+    font-family: var(--body); font-size: 13.5px; color: var(--ink);
+    background: transparent; border: 1px solid var(--line);
+    padding: 5px 13px; cursor: pointer; border-radius: 2px;
+    transition: border-color .15s, color .15s;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+  .chip.invented { border-style: dashed; color: var(--soft); }
+  .chip:focus-visible, .toggle:focus-visible, .legs button:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+
+  .columns {
+    display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr);
+    gap: 30px; align-items: start;
+  }
+  @media (max-width: 840px) { .columns { grid-template-columns: 1fr; gap: 26px; } }
+
+  .col > .eyebrow { display: block; padding-bottom: 9px; border-bottom: 1px solid var(--ink); }
+
+  /* ---- the trait checklist, set like a field form ---- */
+  .trait {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 14px; padding: 8px 0; border-bottom: 1px solid var(--line);
+  }
+  .trait label { cursor: pointer; flex: 1; }
+  .toggle {
+    appearance: none; margin: 0; flex: none; cursor: pointer;
+    width: 42px; height: 23px; border-radius: 2px;
+    background: var(--sunk); border: 1px solid var(--line);
+    position: relative; transition: background .16s, border-color .16s;
+  }
+  .toggle::after {
+    content: ""; position: absolute; inset: 2px auto 2px 2px;
+    width: 17px; background: var(--soft); border-radius: 1px;
+    transition: transform .16s, background .16s;
+  }
+  .toggle:checked { background: var(--accent); border-color: var(--accent); }
+  .toggle:checked::after { transform: translateX(19px); background: var(--accent-ink); }
+
+  .legs { display: flex; gap: 4px; }
+  .legs button {
+    font-family: var(--mono); font-size: 12.5px;
+    width: 28px; height: 26px; cursor: pointer; border-radius: 2px;
+    background: transparent; color: var(--soft); border: 1px solid var(--line);
+  }
+  .legs button.on {
+    background: var(--accent); border-color: var(--accent); color: var(--accent-ink);
+  }
+
+  /* ---- the determination ---- */
+  .determination {
+    padding: 26px 24px 24px; border-radius: 3px; margin-bottom: 26px;
+    color: #fff; transition: background .25s;
+  }
+  .determination .eyebrow { color: rgba(255,255,255,.78); }
+  .determination .name {
+    font-family: var(--display); font-weight: 700;
+    font-size: 44px; line-height: 1.02; letter-spacing: -.02em;
+    margin: 6px 0 10px; text-transform: lowercase;
+  }
+  .determination .basis {
+    font-size: 14px; color: rgba(255,255,255,.9); max-width: 42ch;
+    font-variant-numeric: tabular-nums;
+  }
+
+  ol.key { list-style: none; padding: 0; margin: 0; counter-reset: rung; }
+  ol.key li {
+    position: relative; padding: 11px 0 11px 36px;
+    border-bottom: 1px solid var(--line); font-size: 14.5px;
+  }
+  ol.key li::before {
+    counter-increment: rung; content: counter(rung);
+    position: absolute; left: 0; top: 12px;
+    font-family: var(--mono); font-size: 12px; color: var(--soft);
+  }
+  .verdict-word { font-family: var(--mono); font-size: 13px; font-weight: 500; }
+  .verdict-word.yes { color: var(--accent); }
+  .verdict-word.no { color: var(--soft); }
+
+  /* ---- the guessing game ---- */
+  .game { display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); gap: 30px; align-items: start; }
+  @media (max-width: 840px) { .game { grid-template-columns: 1fr; gap: 26px; } }
+
+  .ask {
+    background: var(--card); border: 1px solid var(--line); border-radius: 3px;
+    padding: 30px 26px 26px; box-shadow: var(--shadow);
+  }
+  .ask .counter { font-family: var(--mono); font-size: 12px; color: var(--soft); letter-spacing: .08em; }
+  .ask .question {
+    font-family: var(--display); font-weight: 600;
+    font-size: clamp(24px, 3.4vw, 32px); line-height: 1.16;
+    letter-spacing: -.015em; text-wrap: balance; margin: 10px 0 22px;
+  }
+  .answers { display: flex; flex-wrap: wrap; gap: 9px; }
+  .answers button {
+    font-family: var(--body); font-size: 15px; cursor: pointer;
+    padding: 10px 24px; border-radius: 2px;
+    border: 1px solid var(--accent); background: transparent; color: var(--accent);
+    transition: background .14s, color .14s;
+  }
+  .answers button:hover { background: var(--accent); color: var(--accent-ink); }
+  .answers button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .answers button.quiet { border-color: var(--line); color: var(--soft); }
+  .answers button.quiet:hover { background: var(--sunk); color: var(--ink); }
+
+  .narrowing { margin-top: 24px; }
+  .bar { height: 7px; background: var(--sunk); border-radius: 2px; overflow: hidden; }
+  .bar span { display: block; height: 100%; background: var(--accent); transition: width .3s; }
+  .remaining {
+    margin-top: 12px; font-size: 13.5px; color: var(--soft); line-height: 1.75;
+  }
+  .remaining b { color: var(--ink); font-weight: 600; }
+
+  .asked { list-style: none; padding: 0; margin: 0; }
+  .asked li {
+    display: flex; justify-content: space-between; gap: 14px;
+    padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px;
+  }
+  .asked .cut { font-family: var(--mono); font-size: 12px; color: var(--soft); flex: none; }
+
+  footer {
+    margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line);
+    color: var(--soft); font-size: 14px; max-width: 72ch;
+  }
+  footer strong { color: var(--ink); font-weight: 600; }
+  code {
+    font-family: var(--mono); font-size: .9em;
+    background: var(--sunk); padding: 1px 5px; border-radius: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; }
+  }
+</style>
+
+<div class="sheet">
+  <header>
+    <span class="eyebrow">A dichotomous key, written by a machine</span>
+    <h1>The Animal Detective</h1>
+    <p>
+      A computer read a book of <strong>277 animals</strong> described only by yes
+      and no facts, and worked out its own set of questions for telling them apart.
+      Nobody wrote those questions. It found them by counting.
+    </p>
+  </header>
+
+  <div class="modes">
+    <button class="mode on" id="mode-key">Describe an animal</button>
+    <button class="mode" id="mode-game">Let it guess yours</button>
+  </div>
+
+  <!-- ==================== mode 1: the key ==================== -->
+  <div id="panel-key">
+    <div class="presets" id="presets"><span class="eyebrow">Start from</span></div>
+
+    <div class="columns">
+      <div class="col">
+        <span class="eyebrow">The specimen</span>
+        <div id="traits"></div>
+      </div>
+
+      <div class="col">
+        <div class="determination" id="determination">
+          <span class="eyebrow">Determination</span>
+          <div class="name" id="answer">mammal</div>
+          <div class="basis" id="basis"></div>
+        </div>
+        <span class="eyebrow">The key it followed</span>
+        <ol class="key" id="key"></ol>
+      </div>
+    </div>
+
+    <footer id="note"></footer>
+  </div>
+
+  <!-- ==================== mode 2: the game ==================== -->
+  <div id="panel-game" hidden>
+    <div class="game">
+      <div>
+        <div class="ask">
+          <span class="counter" id="g-counter">QUESTION 1</span>
+          <div class="question" id="g-question">Think of an animal.</div>
+          <div class="answers" id="g-answers"></div>
+
+          <div class="narrowing">
+            <div class="bar"><span id="g-bar" style="width:100%"></span></div>
+            <div class="remaining" id="g-remaining"></div>
+          </div>
+        </div>
+        <footer id="g-note" style="margin-top:26px"></footer>
+      </div>
+
+      <div class="col">
+        <span class="eyebrow">What it asked</span>
+        <ul class="asked" id="g-asked"></ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TREE = {"leaf": false, "clue": "milk", "question": "Does it feed its babies milk?", "threshold": 0.5, "n": 277, "no": {"leaf": false, "clue": "feathers", "question": "Does it have feathers?", "threshold": 0.5, "n": 191, "no": {"leaf": false, "clue": "fins", "question": "Does it have fins?", "threshold": 0.5, "n": 145, "no": {"leaf": false, "clue": "backbone", "question": "Does it have a spine?", "threshold": 0.5, "n": 108, "no": {"leaf": false, "clue": "airborne", "question": "Can it fly?", "threshold": 0.5, "n": 64, "no": {"leaf": true, "answer": "invertebrate", "n": 39, "counts": {"insect": 7, "invertebrate": 32}}, "yes": {"leaf": true, "answer": "insect", "n": 25, "counts": {"insect": 25}}}, "yes": {"leaf": false, "clue": "aquatic", "question": "Does it live in water?", "threshold": 0.5, "n": 44, "no": {"leaf": true, "answer": "reptile", "n": 20, "counts": {"reptile": 20}}, "yes": {"leaf": true, "answer": "amphibian", "n": 24, "counts": {"amphibian": 16, "reptile": 8}}}}, "yes": {"leaf": true, "answer": "fish", "n": 37, "counts": {"fish": 37}}}, "yes": {"leaf": true, "answer": "bird", "n": 46, "counts": {"bird": 46}}}, "yes": {"leaf": true, "answer": "mammal", "n": 86, "counts": {"mammal": 86}}};
+const CLUES = ["hair", "feathers", "eggs", "milk", "airborne", "aquatic", "predator", "toothed", "backbone", "breathes", "venomous", "fins", "legs", "tail", "domestic", "catsize"];
+const ASK = {"hair": "Does it have hair or fur?", "feathers": "Does it have feathers?", "eggs": "Does it lay eggs?", "milk": "Does it feed its babies milk?", "airborne": "Can it fly?", "aquatic": "Does it live in water?", "predator": "Does it hunt other animals?", "toothed": "Does it have teeth?", "backbone": "Does it have a spine?", "breathes": "Does it breathe air?", "venomous": "Is it venomous?", "fins": "Does it have fins?", "legs": "How many legs does it have?", "tail": "Does it have a tail?", "domestic": "Is it kept as a pet or a farm animal?", "catsize": "Is it at least as big as a cat?"};
+const COLOURS = {"mammal": "#b5485d", "bird": "#e8963c", "fish": "#2f7fa8", "reptile": "#4fa06b", "amphibian": "#8a6bbf", "insect": "#6d4c33", "invertebrate": "#8b95a1"};
+const PRESETS = {"lion": {"real": true, "values": {"hair": 1, "feathers": 0, "eggs": 0, "milk": 1, "airborne": 0, "aquatic": 0, "predator": 1, "toothed": 1, "backbone": 1, "breathes": 1, "venomous": 0, "fins": 0, "legs": 4, "tail": 1, "domestic": 0, "catsize": 1}}, "penguin": {"real": true, "values": {"hair": 0, "feathers": 1, "eggs": 1, "milk": 0, "airborne": 0, "aquatic": 1, "predator": 1, "toothed": 0, "backbone": 1, "breathes": 1, "venomous": 0, "fins": 0, "legs": 2, "tail": 1, "domestic": 0, "catsize": 1}}, "platypus": {"real": true, "values": {"hair": 1, "feathers": 0, "eggs": 1, "milk": 1, "airborne": 0, "aquatic": 1, "predator": 1, "toothed": 0, "backbone": 1, "breathes": 1, "venomous": 1, "fins": 0, "legs": 4, "tail": 1, "domestic": 0, "catsize": 1}}, "shark": {"real": true, "values": {"hair": 0, "feathers": 0, "eggs": 1, "milk": 0, "airborne": 0, "aquatic": 1, "predator": 1, "toothed": 1, "backbone": 1, "breathes": 0, "venomous": 0, "fins": 1, "legs": 0, "tail": 1, "domestic": 0, "catsize": 1}}, "honeybee": {"real": true, "values": {"hair": 1, "feathers": 0, "eggs": 1, "milk": 0, "airborne": 1, "aquatic": 0, "predator": 0, "toothed": 0, "backbone": 0, "breathes": 1, "venomous": 1, "fins": 0, "legs": 6, "tail": 0, "domestic": 1, "catsize": 0}}, "octopus": {"real": true, "values": {"hair": 0, "feathers": 0, "eggs": 1, "milk": 0, "airborne": 0, "aquatic": 1, "predator": 1, "toothed": 0, "backbone": 0, "breathes": 0, "venomous": 0, "fins": 0, "legs": 8, "tail": 0, "domestic": 0, "catsize": 1}}, "frog": {"real": true, "values": {"hair": 0, "feathers": 0, "eggs": 1, "milk": 0, "airborne": 0, "aquatic": 1, "predator": 1, "toothed": 1, "backbone": 1, "breathes": 1, "venomous": 0, "fins": 0, "legs": 4, "tail": 0, "domestic": 0, "catsize": 0}}, "the zorblax": {"real": false, "values": {"hair": 1, "feathers": 1, "eggs": 1, "milk": 0, "airborne": 1, "aquatic": 0, "predator": 1, "toothed": 1, "backbone": 0, "breathes": 1, "venomous": 1, "fins": 0, "legs": 8, "tail": 1, "domestic": 0, "catsize": 1}}};
+const LEGS = [0, 2, 4, 5, 6, 8];
+const BOOK = [{"n":"aardvark","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,1]},{"n":"anteater","g":"mammal","v":[1,0,0,1,0,0,1,0,1,1,0,0,4,1,0,1]},{"n":"antelope","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,0,1]},{"n":"armadillo","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,1]},{"n":"baboon","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,0,1]},{"n":"badger","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,1]},{"n":"bear","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,0,0,1]},{"n":"beaver","g":"mammal","v":[1,0,0,1,0,1,0,1,1,1,0,0,4,1,0,1]},{"n":"bison","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,0,1]},{"n":"boar","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,1]},{"n":"brown bat","g":"mammal","v":[1,0,0,1,1,0,1,1,1,1,0,0,2,1,0,0]},{"n":"buffalo","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,0,1]},{"n":"camel","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,1,1]},{"n":"capybara","g":"mammal","v":[1,0,0,1,0,1,0,1,1,1,0,0,4,0,0,1]},{"n":"cat","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,1,1]},{"n":"cheetah","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,1]},{"n":"chimpanzee","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,2,0,0,1]},{"n":"chinchilla","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,1,0]},{"n":"cow","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,1,1]},{"n":"coyote","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,1]},{"n":"deer","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,0,1]},{"n":"dog","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,1,1]},{"n":"dolphin","g":"mammal","v":[0,0,0,1,0,1,1,1,1,1,0,1,0,1,0,1]},{"n":"donkey","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,1,1]},{"n":"echidna","g":"mammal","v":[1,0,1,1,0,0,1,0,1,1,1,0,4,0,0,0]},{"n":"elephant","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,0,1]},{"n":"ferret","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,1,0]},{"n":"fox","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,1]},{"n":"fruit bat","g":"mammal","v":[1,0,0,1,1,0,0,1,1,1,0,0,2,1,0,0]},{"n":"giant panda","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,0,1]},{"n":"giraffe","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,0,1]},{"n":"goat","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,1,1]},{"n":"gorilla","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,2,0,0,1]},{"n":"guinea pig","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,0,1,0]},{"n":"hamster","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,1,0]},{"n":"hare","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,0,0]},{"n":"hedgehog","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,0]},{"n":"hippopotamus","g":"mammal","v":[1,0,0,1,0,1,0,1,1,1,0,0,4,1,0,1]},{"n":"horse","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,1,1]},{"n":"hyena","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,1]},{"n":"jaguar","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,1]},{"n":"kangaroo","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,2,1,0,1]},{"n":"koala","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,0,0,1]},{"n":"lemur","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,0,0]},{"n":"leopard","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,1]},{"n":"lion","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,1]},{"n":"llama","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,1,1]},{"n":"lynx","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,1]},{"n":"manatee","g":"mammal","v":[0,0,0,1,0,1,0,1,1,1,0,1,0,1,0,1]},{"n":"meerkat","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,0]},{"n":"mole","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,0]},{"n":"mongoose","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,1]},{"n":"moose","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,0,1]},{"n":"mouse","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,0,0]},{"n":"narwhal","g":"mammal","v":[0,0,0,1,0,1,1,1,1,1,0,1,0,1,0,1]},{"n":"opossum","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,1]},{"n":"orangutan","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,2,0,0,1]},{"n":"orca","g":"mammal","v":[0,0,0,1,0,1,1,1,1,1,0,1,0,1,0,1]},{"n":"otter","g":"mammal","v":[1,0,0,1,0,1,1,1,1,1,0,0,4,1,0,1]},{"n":"pangolin","g":"mammal","v":[1,0,0,1,0,0,1,0,1,1,0,0,4,1,0,1]},{"n":"pig","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,1,1]},{"n":"platypus","g":"mammal","v":[1,0,1,1,0,1,1,0,1,1,1,0,4,1,0,1]},{"n":"porcupine","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,0,1]},{"n":"rabbit","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,1,0]},{"n":"raccoon","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,1]},{"n":"rat","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,0]},{"n":"red panda","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,0,1]},{"n":"reindeer","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,0,1]},{"n":"rhinoceros","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,0,1]},{"n":"sea lion","g":"mammal","v":[1,0,0,1,0,1,1,1,1,1,0,1,0,1,0,1]},{"n":"seal","g":"mammal","v":[1,0,0,1,0,1,1,1,1,1,0,1,0,0,0,1]},{"n":"sheep","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,1,1]},{"n":"skunk","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,0]},{"n":"sloth","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,0,1]},{"n":"squirrel","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,0,0]},{"n":"tasmanian devil","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,1]},{"n":"tiger","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,1]},{"n":"vampire bat","g":"mammal","v":[1,0,0,1,1,0,1,1,1,1,0,0,2,1,0,0]},{"n":"walrus","g":"mammal","v":[1,0,0,1,0,1,1,1,1,1,0,1,0,0,0,1]},{"n":"warthog","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,0,1]},{"n":"weasel","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,0]},{"n":"whale","g":"mammal","v":[0,0,0,1,0,1,1,0,1,1,0,1,0,1,0,1]},{"n":"wolf","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,1]},{"n":"wolverine","g":"mammal","v":[1,0,0,1,0,0,1,1,1,1,0,0,4,1,0,1]},{"n":"wombat","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,0,0,1]},{"n":"zebra","g":"mammal","v":[1,0,0,1,0,0,0,1,1,1,0,0,4,1,0,1]},{"n":"albatross","g":"bird","v":[0,1,1,0,1,1,1,0,1,1,0,0,2,1,0,1]},{"n":"blue jay","g":"bird","v":[0,1,1,0,1,0,0,0,1,1,0,0,2,1,0,0]},{"n":"canary","g":"bird","v":[0,1,1,0,1,0,0,0,1,1,0,0,2,1,1,0]},{"n":"chicken","g":"bird","v":[0,1,1,0,0,0,0,0,1,1,0,0,2,1,1,0]},{"n":"cockatoo","g":"bird","v":[0,1,1,0,1,0,0,0,1,1,0,0,2,1,1,0]},{"n":"condor","g":"bird","v":[0,1,1,0,1,0,1,0,1,1,0,0,2,1,0,1]},{"n":"crane","g":"bird","v":[0,1,1,0,1,1,1,0,1,1,0,0,2,1,0,1]},{"n":"crow","g":"bird","v":[0,1,1,0,1,0,1,0,1,1,0,0,2,1,0,0]},{"n":"cuckoo","g":"bird","v":[0,1,1,0,1,0,1,0,1,1,0,0,2,1,0,0]},{"n":"dove","g":"bird","v":[0,1,1,0,1,0,0,0,1,1,0,0,2,1,1,0]},{"n":"duck","g":"bird","v":[0,1,1,0,1,1,0,0,1,1,0,0,2,1,0,0]},{"n":"eagle","g":"bird","v":[0,1,1,0,1,0,1,0,1,1,0,0,2,1,0,1]},{"n":"emu","g":"bird","v":[0,1,1,0,0,0,0,0,1,1,0,0,2,1,0,1]},{"n":"falcon","g":"bird","v":[0,1,1,0,1,0,1,0,1,1,0,0,2,1,0,0]},{"n":"finch","g":"bird","v":[0,1,1,0,1,0,0,0,1,1,0,0,2,1,1,0]},{"n":"flamingo","g":"bird","v":[0,1,1,0,1,1,0,0,1,1,0,0,2,1,0,1]},{"n":"goose","g":"bird","v":[0,1,1,0,1,1,0,0,1,1,0,0,2,1,1,1]},{"n":"gull","g":"bird","v":[0,1,1,0,1,1,1,0,1,1,0,0,2,1,0,0]},{"n":"hawk","g":"bird","v":[0,1,1,0,1,0,1,0,1,1,0,0,2,1,0,0]},{"n":"heron","g":"bird","v":[0,1,1,0,1,1,1,0,1,1,0,0,2,1,0,1]},{"n":"hummingbird","g":"bird","v":[0,1,1,0,1,0,0,0,1,1,0,0,2,1,0,0]},{"n":"kingfisher","g":"bird","v":[0,1,1,0,1,1,1,0,1,1,0,0,2,1,0,0]},{"n":"kiwi","g":"bird","v":[0,1,1,0,0,0,1,0,1,1,0,0,2,0,0,0]},{"n":"lark","g":"bird","v":[0,1,1,0,1,0,0,0,1,1,0,0,2,1,0,0]},{"n":"macaw","g":"bird","v":[0,1,1,0,1,0,0,0,1,1,0,0,2,1,1,1]},{"n":"magpie","g":"bird","v":[0,1,1,0,1,0,1,0,1,1,0,0,2,1,0,0]},{"n":"ostrich","g":"bird","v":[0,1,1,0,0,0,0,0,1,1,0,0,2,1,0,1]},{"n":"owl","g":"bird","v":[0,1,1,0,1,0,1,0,1,1,0,0,2,1,0,0]},{"n":"parakeet","g":"bird","v":[0,1,1,0,1,0,0,0,1,1,0,0,2,1,1,0]},{"n":"peacock","g":"bird","v":[0,1,1,0,1,0,0,0,1,1,0,0,2,1,1,1]},{"n":"pelican","g":"bird","v":[0,1,1,0,1,1,1,0,1,1,0,0,2,1,0,1]},{"n":"penguin","g":"bird","v":[0,1,1,0,0,1,1,0,1,1,0,0,2,1,0,1]},{"n":"pheasant","g":"bird","v":[0,1,1,0,1,0,0,0,1,1,0,0,2,1,0,0]},{"n":"pigeon","g":"bird","v":[0,1,1,0,1,0,0,0,1,1,0,0,2,1,1,0]},{"n":"puffin","g":"bird","v":[0,1,1,0,1,1,1,0,1,1,0,0,2,1,0,0]},{"n":"quail","g":"bird","v":[0,1,1,0,1,0,0,0,1,1,0,0,2,1,1,0]},{"n":"raven","g":"bird","v":[0,1,1,0,1,0,1,0,1,1,0,0,2,1,0,1]},{"n":"robin","g":"bird","v":[0,1,1,0,1,0,1,0,1,1,0,0,2,1,0,0]},{"n":"sparrow","g":"bird","v":[0,1,1,0,1,0,0,0,1,1,0,0,2,1,0,0]},{"n":"stork","g":"bird","v":[0,1,1,0,1,1,1,0,1,1,0,0,2,1,0,1]},{"n":"swan","g":"bird","v":[0,1,1,0,1,1,0,0,1,1,0,0,2,1,0,1]},{"n":"swift","g":"bird","v":[0,1,1,0,1,0,1,0,1,1,0,0,2,1,0,0]},{"n":"toucan","g":"bird","v":[0,1,1,0,1,0,0,0,1,1,0,0,2,1,0,1]},{"n":"turkey","g":"bird","v":[0,1,1,0,0,0,0,0,1,1,0,0,2,1,1,1]},{"n":"vulture","g":"bird","v":[0,1,1,0,1,0,1,0,1,1,0,0,2,1,0,1]},{"n":"woodpecker","g":"bird","v":[0,1,1,0,1,0,0,0,1,1,0,0,2,1,0,0]},{"n":"anchovy","g":"fish","v":[0,0,1,0,0,1,0,1,1,0,0,1,0,1,0,0]},{"n":"angelfish","g":"fish","v":[0,0,1,0,0,1,0,1,1,0,0,1,0,1,1,0]},{"n":"barracuda","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,0,1]},{"n":"bass","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,0,0]},{"n":"betta","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,1,0]},{"n":"carp","g":"fish","v":[0,0,1,0,0,1,0,1,1,0,0,1,0,1,1,0]},{"n":"catfish","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,0,0]},{"n":"clownfish","g":"fish","v":[0,0,1,0,0,1,0,1,1,0,0,1,0,1,1,0]},{"n":"cod","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,0,1]},{"n":"flounder","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,0,0]},{"n":"goldfish","g":"fish","v":[0,0,1,0,0,1,0,1,1,0,0,1,0,1,1,0]},{"n":"grouper","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,0,1]},{"n":"guppy","g":"fish","v":[0,0,0,0,0,1,0,1,1,0,0,1,0,1,1,0]},{"n":"haddock","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,0,0]},{"n":"halibut","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,0,1]},{"n":"herring","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,0,0]},{"n":"koi","g":"fish","v":[0,0,1,0,0,1,0,1,1,0,0,1,0,1,1,1]},{"n":"lionfish","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,1,1,0,1,0,0]},{"n":"mackerel","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,0,0]},{"n":"manta ray","g":"fish","v":[0,0,0,0,0,1,0,0,1,0,0,1,0,1,0,1]},{"n":"marlin","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,0,1]},{"n":"minnow","g":"fish","v":[0,0,1,0,0,1,0,1,1,0,0,1,0,1,0,0]},{"n":"moray eel","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,0,1]},{"n":"perch","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,0,0]},{"n":"pike","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,0,1]},{"n":"piranha","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,0,0]},{"n":"pufferfish","g":"fish","v":[0,0,1,0,0,1,0,1,1,0,1,1,0,1,0,0]},{"n":"salmon","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,0,1]},{"n":"sardine","g":"fish","v":[0,0,1,0,0,1,0,1,1,0,0,1,0,1,0,0]},{"n":"seahorse","g":"fish","v":[0,0,1,0,0,1,0,0,1,0,0,1,0,1,0,0]},{"n":"shark","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,0,1]},{"n":"sole","g":"fish","v":[0,0,1,0,0,1,0,1,1,0,0,1,0,1,0,0]},{"n":"stingray","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,1,1,0,1,0,1]},{"n":"swordfish","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,0,1]},{"n":"tilapia","g":"fish","v":[0,0,1,0,0,1,0,1,1,0,0,1,0,1,1,0]},{"n":"trout","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,0,0]},{"n":"tuna","g":"fish","v":[0,0,1,0,0,1,1,1,1,0,0,1,0,1,0,1]},{"n":"alligator","g":"reptile","v":[0,0,1,0,0,1,1,1,1,1,0,0,4,1,0,1]},{"n":"anaconda","g":"reptile","v":[0,0,0,0,0,1,1,1,1,1,0,0,0,1,0,1]},{"n":"bearded dragon","g":"reptile","v":[0,0,1,0,0,0,1,1,1,1,0,0,4,1,1,0]},{"n":"boa constrictor","g":"reptile","v":[0,0,0,0,0,0,1,1,1,1,0,0,0,1,0,1]},{"n":"caiman","g":"reptile","v":[0,0,1,0,0,1,1,1,1,1,0,0,4,1,0,1]},{"n":"chameleon","g":"reptile","v":[0,0,1,0,0,0,1,1,1,1,0,0,4,1,0,0]},{"n":"cobra","g":"reptile","v":[0,0,1,0,0,0,1,1,1,1,1,0,0,1,0,1]},{"n":"copperhead","g":"reptile","v":[0,0,0,0,0,0,1,1,1,1,1,0,0,1,0,0]},{"n":"crocodile","g":"reptile","v":[0,0,1,0,0,1,1,1,1,1,0,0,4,1,0,1]},{"n":"garter snake","g":"reptile","v":[0,0,0,0,0,0,1,1,1,1,0,0,0,1,0,0]},{"n":"gecko","g":"reptile","v":[0,0,1,0,0,0,1,1,1,1,0,0,4,1,0,0]},{"n":"gila monster","g":"reptile","v":[0,0,1,0,0,0,1,1,1,1,1,0,4,1,0,0]},{"n":"horned lizard","g":"reptile","v":[0,0,1,0,0,0,1,1,1,1,0,0,4,1,0,0]},{"n":"iguana","g":"reptile","v":[0,0,1,0,0,0,0,1,1,1,0,0,4,1,0,1]},{"n":"komodo dragon","g":"reptile","v":[0,0,1,0,0,0,1,1,1,1,1,0,4,1,0,1]},{"n":"monitor lizard","g":"reptile","v":[0,0,1,0,0,0,1,1,1,1,1,0,4,1,0,1]},{"n":"python","g":"reptile","v":[0,0,1,0,0,0,1,1,1,1,0,0,0,1,0,1]},{"n":"rattlesnake","g":"reptile","v":[0,0,0,0,0,0,1,1,1,1,1,0,0,1,0,1]},{"n":"sea snake","g":"reptile","v":[0,0,0,0,0,1,1,1,1,1,1,0,0,1,0,0]},{"n":"sea turtle","g":"reptile","v":[0,0,1,0,0,1,1,0,1,1,0,0,4,1,0,1]},{"n":"skink","g":"reptile","v":[0,0,1,0,0,0,1,1,1,1,0,0,4,1,0,0]},{"n":"slowworm","g":"reptile","v":[0,0,0,0,0,0,1,1,1,1,0,0,0,1,0,0]},{"n":"snapping turtle","g":"reptile","v":[0,0,1,0,0,1,1,0,1,1,0,0,4,1,0,1]},{"n":"taipan","g":"reptile","v":[0,0,1,0,0,0,1,1,1,1,1,0,0,1,0,1]},{"n":"terrapin","g":"reptile","v":[0,0,1,0,0,1,1,0,1,1,0,0,4,1,1,0]},{"n":"tortoise","g":"reptile","v":[0,0,1,0,0,0,0,0,1,1,0,0,4,1,0,1]},{"n":"tuatara","g":"reptile","v":[0,0,1,0,0,0,1,1,1,1,0,0,4,1,0,0]},{"n":"viper","g":"reptile","v":[0,0,0,0,0,0,1,1,1,1,1,0,0,1,0,0]},{"n":"axolotl","g":"amphibian","v":[0,0,1,0,0,1,1,1,1,1,0,0,4,1,1,0]},{"n":"bullfrog","g":"amphibian","v":[0,0,1,0,0,1,1,1,1,1,0,0,4,0,0,0]},{"n":"caecilian","g":"amphibian","v":[0,0,1,0,0,1,1,1,1,1,0,0,0,1,0,0]},{"n":"cane toad","g":"amphibian","v":[0,0,1,0,0,1,1,1,1,1,1,0,4,0,0,0]},{"n":"fire salamander","g":"amphibian","v":[0,0,1,0,0,1,1,1,1,1,1,0,4,1,0,0]},{"n":"frog","g":"amphibian","v":[0,0,1,0,0,1,1,1,1,1,0,0,4,0,0,0]},{"n":"hellbender","g":"amphibian","v":[0,0,1,0,0,1,1,1,1,1,0,0,4,1,0,0]},{"n":"mudpuppy","g":"amphibian","v":[0,0,1,0,0,1,1,1,1,1,0,0,4,1,0,0]},{"n":"newt","g":"amphibian","v":[0,0,1,0,0,1,1,1,1,1,1,0,4,1,0,0]},{"n":"olm","g":"amphibian","v":[0,0,1,0,0,1,1,1,1,1,0,0,4,1,0,0]},{"n":"poison frog","g":"amphibian","v":[0,0,1,0,0,1,1,1,1,1,1,0,4,0,0,0]},{"n":"salamander","g":"amphibian","v":[0,0,1,0,0,1,1,1,1,1,0,0,4,1,0,0]},{"n":"siren","g":"amphibian","v":[0,0,1,0,0,1,1,1,1,1,0,0,2,1,0,0]},{"n":"spadefoot toad","g":"amphibian","v":[0,0,1,0,0,1,1,1,1,1,0,0,4,0,0,0]},{"n":"toad","g":"amphibian","v":[0,0,1,0,0,1,1,1,1,1,1,0,4,0,0,0]},{"n":"tree frog","g":"amphibian","v":[0,0,1,0,0,1,1,1,1,1,0,0,4,0,0,0]},{"n":"ant","g":"insect","v":[0,0,1,0,0,0,1,0,0,1,0,0,6,0,0,0]},{"n":"aphid","g":"insect","v":[0,0,0,0,1,0,0,0,0,1,0,0,6,0,0,0]},{"n":"assassin bug","g":"insect","v":[0,0,1,0,1,0,1,0,0,1,1,0,6,0,0,0]},{"n":"bedbug","g":"insect","v":[0,0,1,0,0,0,1,0,0,1,0,0,6,0,0,0]},{"n":"beetle","g":"insect","v":[0,0,1,0,1,0,0,0,0,1,0,0,6,0,0,0]},{"n":"bumblebee","g":"insect","v":[1,0,1,0,1,0,0,0,0,1,1,0,6,0,0,0]},{"n":"butterfly","g":"insect","v":[1,0,1,0,1,0,0,0,0,1,0,0,6,0,0,0]},{"n":"cicada","g":"insect","v":[0,0,1,0,1,0,0,0,0,1,0,0,6,0,0,0]},{"n":"cockroach","g":"insect","v":[0,0,1,0,1,0,0,0,0,1,0,0,6,0,0,0]},{"n":"cricket","g":"insect","v":[0,0,1,0,1,0,0,0,0,1,0,0,6,0,0,0]},{"n":"damselfly","g":"insect","v":[0,0,1,0,1,0,1,0,0,1,0,0,6,0,0,0]},{"n":"dragonfly","g":"insect","v":[0,0,1,0,1,0,1,0,0,1,0,0,6,0,0,0]},{"n":"earwig","g":"insect","v":[0,0,1,0,1,0,1,0,0,1,0,0,6,0,0,0]},{"n":"fire ant","g":"insect","v":[0,0,1,0,0,0,1,0,0,1,1,0,6,0,0,0]},{"n":"firefly","g":"insect","v":[0,0,1,0,1,0,1,0,0,1,0,0,6,0,0,0]},{"n":"flea","g":"insect","v":[0,0,1,0,0,0,1,0,0,1,0,0,6,0,0,0]},{"n":"fruit fly","g":"insect","v":[1,0,1,0,1,0,0,0,0,1,0,0,6,0,0,0]},{"n":"grasshopper","g":"insect","v":[0,0,1,0,1,0,0,0,0,1,0,0,6,0,0,0]},{"n":"honeybee","g":"insect","v":[1,0,1,0,1,0,0,0,0,1,1,0,6,0,1,0]},{"n":"hornet","g":"insect","v":[1,0,1,0,1,0,1,0,0,1,1,0,6,0,0,0]},{"n":"housefly","g":"insect","v":[1,0,1,0,1,0,0,0,0,1,0,0,6,0,0,0]},{"n":"ladybug","g":"insect","v":[0,0,1,0,1,0,1,0,0,1,0,0,6,0,0,0]},{"n":"locust","g":"insect","v":[0,0,1,0,1,0,0,0,0,1,0,0,6,0,0,0]},{"n":"mantis","g":"insect","v":[0,0,1,0,1,0,1,0,0,1,0,0,6,0,0,0]},{"n":"mayfly","g":"insect","v":[0,0,1,0,1,0,0,0,0,1,0,0,6,0,0,0]},{"n":"mosquito","g":"insect","v":[0,0,1,0,1,0,1,0,0,1,0,0,6,0,0,0]},{"n":"moth","g":"insect","v":[1,0,1,0,1,0,0,0,0,1,0,0,6,0,0,0]},{"n":"silverfish","g":"insect","v":[0,0,1,0,0,0,0,0,0,1,0,0,6,0,0,0]},{"n":"stick insect","g":"insect","v":[0,0,1,0,0,0,0,0,0,1,0,0,6,0,1,0]},{"n":"termite","g":"insect","v":[0,0,1,0,0,0,0,0,0,1,0,0,6,0,0,0]},{"n":"wasp","g":"insect","v":[1,0,1,0,1,0,1,0,0,1,1,0,6,0,0,0]},{"n":"weevil","g":"insect","v":[0,0,1,0,1,0,0,0,0,1,0,0,6,0,0,0]},{"n":"barnacle","g":"invertebrate","v":[0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0]},{"n":"black widow","g":"invertebrate","v":[0,0,1,0,0,0,1,0,0,1,1,0,8,0,0,0]},{"n":"brittle star","g":"invertebrate","v":[0,0,1,0,0,1,1,0,0,0,0,0,5,0,0,0]},{"n":"clam","g":"invertebrate","v":[0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0]},{"n":"coral","g":"invertebrate","v":[0,0,1,0,0,1,1,0,0,0,1,0,0,0,0,0]},{"n":"crab","g":"invertebrate","v":[0,0,1,0,0,1,1,0,0,0,0,0,4,0,0,0]},{"n":"crayfish","g":"invertebrate","v":[0,0,1,0,0,1,1,0,0,0,0,0,6,0,0,0]},{"n":"cuttlefish","g":"invertebrate","v":[0,0,1,0,0,1,1,0,0,0,0,0,8,0,0,1]},{"n":"earthworm","g":"invertebrate","v":[0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0]},{"n":"hermit crab","g":"invertebrate","v":[0,0,1,0,0,1,0,0,0,0,0,0,8,0,1,0]},{"n":"horseshoe crab","g":"invertebrate","v":[0,0,1,0,0,1,1,0,0,0,0,0,8,1,0,1]},{"n":"jellyfish","g":"invertebrate","v":[0,0,1,0,0,1,1,0,0,0,1,0,0,0,0,0]},{"n":"krill","g":"invertebrate","v":[0,0,1,0,0,1,0,0,0,0,0,0,6,0,0,0]},{"n":"leech","g":"invertebrate","v":[0,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0]},{"n":"limpet","g":"invertebrate","v":[0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0]},{"n":"lobster","g":"invertebrate","v":[0,0,1,0,0,1,1,0,0,0,0,0,6,0,0,1]},{"n":"mussel","g":"invertebrate","v":[0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0]},{"n":"nautilus","g":"invertebrate","v":[0,0,1,0,0,1,1,0,0,0,0,0,8,0,0,0]},{"n":"octopus","g":"invertebrate","v":[0,0,1,0,0,1,1,0,0,0,0,0,8,0,0,1]},{"n":"oyster","g":"invertebrate","v":[0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0]},{"n":"scallop","g":"invertebrate","v":[0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0]},{"n":"scorpion","g":"invertebrate","v":[0,0,0,0,0,0,1,0,0,1,1,0,8,1,0,0]},{"n":"sea anemone","g":"invertebrate","v":[0,0,1,0,0,1,1,0,0,0,1,0,0,0,0,0]},{"n":"sea cucumber","g":"invertebrate","v":[0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0]},{"n":"sea urchin","g":"invertebrate","v":[0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0]},{"n":"shrimp","g":"invertebrate","v":[0,0,1,0,0,1,0,0,0,0,0,0,6,0,0,0]},{"n":"slug","g":"invertebrate","v":[0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0]},{"n":"snail","g":"invertebrate","v":[0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0]},{"n":"squid","g":"invertebrate","v":[0,0,1,0,0,1,1,0,0,0,0,0,8,0,0,1]},{"n":"starfish","g":"invertebrate","v":[0,0,1,0,0,1,1,0,0,0,0,0,5,0,0,0]},{"n":"tarantula","g":"invertebrate","v":[1,0,1,0,0,0,1,0,0,1,1,0,8,0,1,0]},{"n":"tick","g":"invertebrate","v":[0,0,1,0,0,0,1,0,0,1,0,0,8,0,0,0]}];
+
+/* ============================ mode switching ============================ */
+const panels = { key: document.getElementById('panel-key'), game: document.getElementById('panel-game') };
+const tabs = { key: document.getElementById('mode-key'), game: document.getElementById('mode-game') };
+Object.keys(tabs).forEach(which => {
+  tabs[which].addEventListener('click', () => {
+    Object.keys(tabs).forEach(other => {
+      tabs[other].classList.toggle('on', other === which);
+      panels[other].hidden = other !== which;
+    });
+    if (which === 'game') newGame();
+  });
+});
+
+/* ============================== mode 1: key ============================== */
+const state = Object.assign({}, PRESETS['lion'].values);
+
+const traitBox = document.getElementById('traits');
+CLUES.forEach(clue => {
+  const row = document.createElement('div');
+  row.className = 'trait';
+  const id = 'c_' + clue;
+
+  const label = document.createElement('label');
+  label.setAttribute('for', id);
+  label.textContent = ASK[clue];
+  row.appendChild(label);
+
+  if (clue === 'legs') {
+    const group = document.createElement('div');
+    group.className = 'legs';
+    LEGS.forEach(n => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = n;
+      b.dataset.legs = n;
+      b.setAttribute('aria-label', n + ' legs');
+      b.addEventListener('click', () => { state.legs = n; render(); });
+      group.appendChild(b);
+    });
+    row.appendChild(group);
+  } else {
+    const box = document.createElement('input');
+    box.type = 'checkbox';
+    box.className = 'toggle';
+    box.id = id;
+    box.addEventListener('change', e => {
+      state[clue] = e.target.checked ? 1 : 0;
+      render();
+    });
+    row.appendChild(box);
+  }
+  traitBox.appendChild(row);
+});
+
+const chips = document.getElementById('presets');
+Object.keys(PRESETS).forEach(name => {
+  const b = document.createElement('button');
+  b.className = 'chip' + (PRESETS[name].real ? '' : ' invented');
+  b.textContent = name;
+  b.addEventListener('click', () => {
+    Object.assign(state, PRESETS[name].values);
+    render();
+  });
+  chips.appendChild(b);
+});
+
+function walk(specimen) {
+  let node = TREE;
+  const rungs = [];
+  while (!node.leaf) {
+    const value = specimen[node.clue];
+    const yes = value > node.threshold;
+    rungs.push({ question: node.question, said: node.clue === 'legs' ? String(value) : (yes ? 'yes' : 'no'), yes: yes });
+    node = yes ? node.yes : node.no;
+  }
+  return { rungs: rungs, leaf: node };
+}
+
+function render() {
+  CLUES.forEach(clue => {
+    if (clue === 'legs') {
+      document.querySelectorAll('[data-legs]').forEach(b => {
+        b.classList.toggle('on', Number(b.dataset.legs) === state.legs);
+      });
+    } else {
+      document.getElementById('c_' + clue).checked = state[clue] === 1;
+    }
+  });
+
+  const out = walk(state);
+  const answer = out.leaf.answer;
+  const total = Object.values(out.leaf.counts).reduce((a, b) => a + b, 0);
+  const agreed = out.leaf.counts[answer];
+  const sure = Math.round(100 * agreed / total);
+
+  document.getElementById('determination').style.background = COLOURS[answer];
+  document.getElementById('answer').textContent = answer;
+  document.getElementById('basis').textContent =
+    sure + '% sure. ' + total + ' animals in the book answered these questions the same way, and '
+    + agreed + ' of them ' + (agreed === 1 ? 'was' : 'were') + ' a ' + answer + '.';
+
+  const list = document.getElementById('key');
+  list.innerHTML = '';
+  out.rungs.forEach(r => {
+    const li = document.createElement('li');
+    li.textContent = r.question + ' ';
+    const said = document.createElement('span');
+    said.className = 'verdict-word ' + (r.yes ? 'yes' : 'no');
+    said.textContent = r.said;
+    li.appendChild(said);
+    list.appendChild(li);
+  });
+
+  const skipped = CLUES.length - out.rungs.length;
+  document.getElementById('note').innerHTML =
+    'It settled on that after <strong>' + out.rungs.length + ' question'
+    + (out.rungs.length === 1 ? '' : 's') + '</strong>, and never asked about the other '
+    + skipped + '. That is the entire model: no neural network, no server, no internet. '
+    + 'About forty lines of logic reading a 2 KB file called <code>tree.json</code>.';
+}
+
+render();
+
+/* ============================= mode 2: game ============================= */
+let alive = [];
+let asked = [];
+let finished = false;
+
+function spread(pool, clue) {
+  /* Expected number still standing after this question. Lower is a better split. */
+  const buckets = {};
+  pool.forEach(a => {
+    const v = a.v[CLUES.indexOf(clue)];
+    buckets[v] = (buckets[v] || 0) + 1;
+  });
+  let total = 0;
+  Object.values(buckets).forEach(n => { total += n * n; });
+  return total / pool.length;
+}
+
+function bestQuestion(pool, used) {
+  let pick = null, score = Infinity;
+  CLUES.forEach(clue => {
+    if (used.indexOf(clue) !== -1) return;
+    const values = new Set(pool.map(a => a.v[CLUES.indexOf(clue)]));
+    if (values.size < 2) return;          /* everyone agrees, so it tells us nothing */
+    const s = spread(pool, clue);
+    if (s < score) { score = s; pick = clue; }
+  });
+  return pick;
+}
+
+function newGame() {
+  alive = BOOK.slice();
+  asked = [];
+  finished = false;
+  step();
+}
+
+function step() {
+  const counter = document.getElementById('g-counter');
+  const question = document.getElementById('g-question');
+  const answers = document.getElementById('g-answers');
+  const bar = document.getElementById('g-bar');
+  const remaining = document.getElementById('g-remaining');
+  const note = document.getElementById('g-note');
+
+  bar.style.width = Math.max(1.2, 100 * alive.length / BOOK.length) + '%';
+  answers.innerHTML = '';
+
+  const names = alive.slice(0, 14).map(a => a.n);
+  remaining.innerHTML = alive.length === 0
+    ? 'No animal in the book matches all of that. It has run out of ideas.'
+    : '<b>' + alive.length + '</b> of ' + BOOK.length + ' animals still fit'
+      + (alive.length <= 14 ? ': ' + names.join(', ') : '.');
+
+  const used = asked.map(a => a.clue);
+  const next = alive.length > 1 ? bestQuestion(alive, used) : null;
+
+  if (alive.length === 1 || next === null || asked.length >= 20) {
+    finished = true;
+    counter.textContent = 'MY GUESS';
+    if (alive.length === 0) {
+      question.textContent = 'I give up.';
+      note.innerHTML = 'Nothing in the book answers the way you did, which means your animal '
+        + 'is either not in it or is described differently. A model can only ever know what '
+        + 'it was shown.';
+    } else {
+      question.textContent = 'Is it ' + article(alive[0].n) + ' ' + alive[0].n + '?';
+      const others = alive.length - 1;
+      note.innerHTML = 'Found in <strong>' + asked.length + ' question'
+        + (asked.length === 1 ? '' : 's') + '</strong> out of a possible ' + CLUES.length + '. '
+        + 'Each one was chosen by the same rule that built the tree on the other tab: try every '
+        + 'question still available, and keep whichever one splits the survivors most evenly. '
+        + (others > 0
+            ? 'It cannot get closer than this, because ' + others + ' other animal'
+              + (others === 1 ? '' : 's') + ' in the book answer every question identically.'
+            : 'Nothing else in the book answers all of those the same way.');
+    }
+    const again = document.createElement('button');
+    again.className = 'quiet';
+    again.textContent = 'Play again';
+    again.addEventListener('click', newGame);
+    answers.appendChild(again);
+    return;
+  }
+
+  counter.textContent = 'QUESTION ' + (asked.length + 1);
+  question.textContent = ASK[next];
+  note.innerHTML = 'Think of any animal and answer honestly. The page has no idea what you '
+    + 'picked. It only knows which animals are still consistent with what you have said.';
+
+  const column = CLUES.indexOf(next);
+  if (next === 'legs') {
+    const offered = [...new Set(alive.map(a => a.v[column]))].sort((x, y) => x - y);
+    offered.forEach(n => {
+      const b = document.createElement('button');
+      b.textContent = n;
+      b.addEventListener('click', () => answer(next, column, v => v === n, String(n)));
+      answers.appendChild(b);
+    });
+  } else {
+    [['Yes', 1], ['No', 0]].forEach(pair => {
+      const b = document.createElement('button');
+      b.textContent = pair[0];
+      b.addEventListener('click', () => answer(next, column, v => v === pair[1], pair[0].toLowerCase()));
+      answers.appendChild(b);
+    });
+  }
+}
+
+function answer(clue, column, keep, said) {
+  const before = alive.length;
+  alive = alive.filter(a => keep(a.v[column]));
+  asked.push({ clue: clue, said: said, before: before, after: alive.length });
+
+  const list = document.getElementById('g-asked');
+  list.innerHTML = '';
+  asked.forEach(a => {
+    const li = document.createElement('li');
+    const text = document.createElement('span');
+    text.innerHTML = ASK[a.clue] + ' <span class="verdict-word '
+      + (a.said === 'no' ? 'no' : 'yes') + '">' + a.said + '</span>';
+    const cut = document.createElement('span');
+    cut.className = 'cut';
+    cut.textContent = a.before + ' -> ' + a.after;
+    li.appendChild(text);
+    li.appendChild(cut);
+    list.appendChild(li);
+  });
+
+  step();
+}
+
+function article(word) {
+  return 'aeiou'.indexOf(word[0]) === -1 ? 'a' : 'an';
+}
+</script>
+
+</body>
+</html>

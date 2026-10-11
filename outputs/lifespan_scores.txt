@@ -1,0 +1,7 @@
+Predicting how long an animal lives
+===================================
+animals            277
+weight only        51.4% of the variation explained
+weight + 16 clues  63.3%
+median error       a factor of 1.47
+within 2x          74.4% of animals

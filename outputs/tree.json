@@ -1,0 +1,100 @@
+{
+ "leaf": false,
+ "clue": "milk",
+ "question": "Does it feed its babies milk?",
+ "threshold": 0.5,
+ "n": 277,
+ "no": {
+  "leaf": false,
+  "clue": "feathers",
+  "question": "Does it have feathers?",
+  "threshold": 0.5,
+  "n": 191,
+  "no": {
+   "leaf": false,
+   "clue": "fins",
+   "question": "Does it have fins?",
+   "threshold": 0.5,
+   "n": 145,
+   "no": {
+    "leaf": false,
+    "clue": "backbone",
+    "question": "Does it have a spine?",
+    "threshold": 0.5,
+    "n": 108,
+    "no": {
+     "leaf": false,
+     "clue": "airborne",
+     "question": "Can it fly?",
+     "threshold": 0.5,
+     "n": 64,
+     "no": {
+      "leaf": true,
+      "answer": "invertebrate",
+      "n": 39,
+      "counts": {
+       "insect": 7,
+       "invertebrate": 32
+      }
+     },
+     "yes": {
+      "leaf": true,
+      "answer": "insect",
+      "n": 25,
+      "counts": {
+       "insect": 25
+      }
+     }
+    },
+    "yes": {
+     "leaf": false,
+     "clue": "aquatic",
+     "question": "Does it live in water?",
+     "threshold": 0.5,
+     "n": 44,
+     "no": {
+      "leaf": true,
+      "answer": "reptile",
+      "n": 20,
+      "counts": {
+       "reptile": 20
+      }
+     },
+     "yes": {
+      "leaf": true,
+      "answer": "amphibian",
+      "n": 24,
+      "counts": {
+       "amphibian": 16,
+       "reptile": 8
+      }
+     }
+    }
+   },
+   "yes": {
+    "leaf": true,
+    "answer": "fish",
+    "n": 37,
+    "counts": {
+     "fish": 37
+    }
+   }
+  },
+  "yes": {
+   "leaf": true,
+   "answer": "bird",
+   "n": 46,
+   "counts": {
+    "bird": 46
+   }
+  }
+ },
+ "yes": {
+  "leaf": true,
+  "answer": "mammal",
+  "n": 86,
+  "counts": {
+   "mammal": 86
+  }
+ }
+}

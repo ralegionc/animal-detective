@@ -1,0 +1,13 @@
+              precision    recall  f1-score   support
+
+   amphibian       0.83      1.00      0.91         5
+        bird       1.00      1.00      1.00        14
+        fish       1.00      1.00      1.00        11
+      insect       1.00      0.70      0.82        10
+invertebrate       0.77      1.00      0.87        10
+      mammal       1.00      1.00      1.00        26
+     reptile       1.00      0.88      0.93         8
+
+    accuracy                           0.95        84
+   macro avg       0.94      0.94      0.93        84
+weighted avg       0.96      0.95      0.95        84

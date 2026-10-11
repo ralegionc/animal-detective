@@ -1,0 +1,30 @@
+What the computer worked out, written as a game of twenty questions
+===================================================================
+Start at the top. Answer each question about your animal and follow the
+branch. Where the arrow appears, that is the computer's answer.
+
+Does it feed its babies milk?
+  YES ->
+        => say MAMMAL   (60 animals landed here, 100% of them are mammal)
+  NO ->
+        Does it have feathers?
+          YES ->
+                => say BIRD   (32 animals landed here, 100% of them are bird)
+          NO ->
+                Does it have fins?
+                  YES ->
+                        => say FISH   (26 animals landed here, 100% of them are fish)
+                  NO ->
+                        Does it have a spine?
+                          YES ->
+                                Does it live in water?
+                                  YES ->
+                                        => say AMPHIBIAN   (18 animals landed here, 61% of them are amphibian)
+                                  NO ->
+                                        => say REPTILE   (13 animals landed here, 100% of them are reptile)
+                          NO ->
+                                Can it fly?
+                                  YES ->
+                                        => say INSECT   (18 animals landed here, 100% of them are insect)
+                                  NO ->
+                                        => say INVERTEBRATE   (26 animals landed here, 85% of them are invertebrate)
